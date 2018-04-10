@@ -19,16 +19,18 @@ axes location off
 mol delrep top 0
 
 # Substrate (Selection #0)
-mol modselect 0 top type < 0
-#mol modselect 0 top type < 4
-mol modstyle 0 top VDW 1 12
-mol modmaterial 0 top AOChalky
+#mol color Name
+#mol representation VDW 1 12
+#mol selection type < 4
+#mol material AOChalky
+#mol addrep top
 
 # Water (Selection #1)
+mol color Name
+mol representation VDW 1 12
+mol selection type >= 4
+mol material AOChalky
 mol addrep top
-mol modselect 1 top type >= 4
-mol modstyle 1 top VDW 1 12
-mol modmaterial 1 top AOChalky
 
 # Al
 color Name 1 gray

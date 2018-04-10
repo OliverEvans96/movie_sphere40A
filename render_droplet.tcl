@@ -64,7 +64,8 @@ puts "atom$partnum: $numframes frames."
 # Last one is a repeat, so skip
 for {set i 0} {$i < $numframes-1} {incr i} {
     # Move to next frame (first one is unnecessary)
-    animate goto [expr $i + 1]
+    #animate goto [expr $i + 1]
+    molinfo top set frame [expr $i + 1]
     puts "Current frame: [molinfo top get frame]"
     # Assuming all previous parts have 500 frames
     set framenum [expr 500*($partnum-1) + $i]

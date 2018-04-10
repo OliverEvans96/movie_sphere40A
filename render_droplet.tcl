@@ -38,12 +38,20 @@ color Name 4 red
 color Name 5 white
 
 # Camera position
-rotate x to 0
-rotate y to 0
-rotate z to 0
-rotate z by 25
-rotate x by -65
 scale by 4
+set elevation 30
+set framesperrotation 500
+
+# Polar angle
+set polar [expr 90 - $elevation]
+# Azimuthal degrees per frame
+set azimstep [expr 360 / $framesperrotation]
+
+# Set to initial position
+rotate x by -$polar
+
+proc azim_rotate { polar azimstep } {
+}
 
 # Render settings
 #display resize 1920 1080
@@ -72,6 +80,12 @@ for {set i 0} {$i < $numframes-1} {incr i} {
     # Formatted frame number
     set fmt_fn [format %03d $framenum]
     puts "atom$partnum/$i ($fmt_fn)"
+
+    # Rotate camera
+    rotate x by $polar
+    rotate z by [expr -$azimstep]
+    rotate x by [expr -$polar]
+
     # Render
     render Tachyon render/scene/$fmt_fn.dat $tachyon -aasamples 12 %s -format TARGA -o render/img/$fmt_fn.tga
 }

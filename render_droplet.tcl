@@ -15,8 +15,12 @@ color Display Background white
 # No axes
 axes location off
 
+# Delete defaul representation
+mol delrep top 0
+
 # Substrate (Selection #0)
-mol modselect 0 top type < 4
+mol modselect 0 top type < 0
+#mol modselect 0 top type < 4
 mol modstyle 0 top VDW 1 12
 mol modmaterial 0 top AOChalky
 
@@ -40,18 +44,20 @@ color Name 5 white
 # Camera position
 scale by 4
 set elevation 30
-set framesperrotation 500
+set framesperrotation 100
 
 # Polar angle
 set polar [expr 90 - $elevation]
-# Azimuthal degrees per frame
-set azimstep [expr 360 / $framesperrotation]
+# Azimuthal degrees per MD frame
+set azim_fstep [expr 360.0 / $framesperrotation]
+
+# Multiple renders per MD frame for cool effect
+# (camera motion is smoother than molecular motion)
+set rendersperframe 5
+set azim_rstep [expr $azim_fstep / $rendersperframe]
 
 # Set to initial position
 rotate x by -$polar
-
-proc azim_rotate { polar azimstep } {
-}
 
 # Render settings
 #display resize 1920 1080
@@ -77,16 +83,20 @@ for {set i 0} {$i < $numframes-1} {incr i} {
     puts "Current frame: [molinfo top get frame]"
     # Assuming all previous parts have 500 frames
     set framenum [expr 500*($partnum-1) + $i]
-    # Formatted frame number
-    set fmt_fn [format %03d $framenum]
-    puts "atom$partnum/$i ($fmt_fn)"
 
-    # Rotate camera
-    rotate x by $polar
-    rotate z by [expr -$azimstep]
-    rotate x by [expr -$polar]
+    # Multiple renders per frame from different angles
+    for {set j 0} {$j < $rendersperframe} {incr j} {
+       # Rotate camera
+       rotate x by $polar
+       rotate z by [expr -$azim_rstep]
+       rotate x by [expr -$polar]
 
-    # Render
-    render Tachyon render/scene/$fmt_fn.dat $tachyon -aasamples 12 %s -format TARGA -o render/img/$fmt_fn.tga
+       # Formatted render number
+       set fmt_rn [format %05d [expr $rendersperframe * $framenum + $j]]
+       puts "atom$partnum/$i-$j ($fmt_rn)"
+
+       # Render
+       render Tachyon render/scene/$fmt_rn.dat $tachyon -aasamples 12 %s -format TARGA -o render/img/$fmt_rn.tga
+    }
 }
 exit

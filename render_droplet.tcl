@@ -4,7 +4,8 @@ set home $::env(HOME)
 set base $::env(PWD)
 set tachyon $home/local/lib/vmd/tachyon_LINUXAMD64
 # Just part number, e.g. 3 (for atom3)
-set partnum [lindex $argv 0]
+set rendername [lindex $argv 0]
+set partnum [lindex $argv 1]
 
 # Load molecule
 topo readlammpsdata $base/data/lammps_noZperiod_3A.dat
@@ -19,11 +20,11 @@ axes location off
 mol delrep top 0
 
 # Substrate (Selection #0)
-#mol color Name
-#mol representation VDW 1 12
-#mol selection type < 4
-#mol material AOChalky
-#mol addrep top
+mol color Name
+mol representation VDW 1 12
+mol selection type < 4
+mol material AOChalky
+mol addrep top
 
 # Water (Selection #1)
 mol color Name
@@ -35,7 +36,7 @@ mol addrep top
 # Al
 color Name 1 gray
 # O
-color Name 2 blue3
+color Name 2 ochre
 # Substrate H
 color Name 3 blue2
 # O
@@ -46,24 +47,25 @@ color Name 5 white
 # Camera position
 scale by 4
 set elevation 30
-set framesperrotation 100
+set rendersperrotation 1200
 
 # Polar angle
 set polar [expr 90 - $elevation]
 # Azimuthal degrees per MD frame
-set azim_fstep [expr 360.0 / $framesperrotation]
+#set azim_fstep [expr 360.0 / $framesperrotation]
 
 # Multiple renders per MD frame for cool effect
 # (camera motion is smoother than molecular motion)
-set rendersperframe 5
-set azim_rstep [expr $azim_fstep / $rendersperframe]
+set rendersperframe 2
+#set azim_rstep [expr $azim_fstep / $rendersperframe]
+set azim_rstep [expr 360.0 / $rendersperrotation]
 
 # Set to initial position
 rotate x by -$polar
 
 # Render settings
-#display resize 1920 1080
-display resize 800 450
+display resize 1920 1080
+#display resize 800 450
 display ambientocclusion on
 display shadows on
 display dof on
@@ -72,7 +74,8 @@ display dof_focaldist 1.465
 
 # Load frames
 # Wait until last frame (-1) is loaded before proceeding.
-mol addfile data/atom$partnum type {lammpstrj} first 0 last -1 waitfor -1
+set maxframe -1
+mol addfile data/atom$partnum type {lammpstrj} first 0 last $maxframe waitfor $maxframe
 set numframes [molinfo top get numframes]
 puts "atom$partnum: $numframes frames."
 
@@ -98,7 +101,7 @@ for {set i 0} {$i < $numframes-1} {incr i} {
        puts "atom$partnum/$i-$j ($fmt_rn)"
 
        # Render
-       render Tachyon render/scene/$fmt_rn.dat $tachyon -aasamples 12 %s -format TARGA -o render/img/$fmt_rn.tga
+       render Tachyon render/scene/$rendername/$fmt_rn.dat $tachyon -aasamples 12 %s -format TARGA -o render/img/$rendername/$fmt_rn.tga
     }
 }
 exit
